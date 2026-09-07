@@ -1,0 +1,177 @@
+<h2>📊 Base de Dados Semanal</h2>
+
+<input id="periodoSemana" type="text" placeholder="Ex: 01-07 Setembro">
+
+<input id="kmSemana" type="number" placeholder="KM feitos">
+
+<input id="mediaKmh" type="number" step="0.1" placeholder="Média KM/H">
+
+<input id="consumo100" type="number" step="0.1" placeholder="Consumo L/100KM">
+
+<input id="kwhSemana" type="number" step="0.1" placeholder="KWh da semana">
+
+<input id="horasSemana" type="number" step="0.1" placeholder="Horas feitas">
+
+<input id="valorCombustivel" type="number" step="0.01" placeholder="Preço combustível €/L">
+
+<input id="gastoSemana" type="number" step="0.01" placeholder="Valor gasto (€)">
+
+<button onclick="guardarSemana()">
+💾 GUARDAR SEMANA
+</button>
+
+<div id="historyList"></div>
+
+<button onclick="limparHistorico()">
+🗑 LIMPAR HISTÓRICO
+</button>
+<script>
+
+let historico =
+JSON.parse(localStorage.getItem("historicoSemanal")) || [];
+
+function guardarSemana() {
+
+    const semana = {
+
+        id: Date.now(),
+
+        periodo: document.getElementById("periodoSemana").value,
+
+        km: Number(
+            document.getElementById("kmSemana").value
+        ),
+
+        mediaKmh: Number(
+            document.getElementById("mediaKmh").value
+        ),
+
+        consumo100: Number(
+            document.getElementById("consumo100").value
+        ),
+
+        kwhSemana: Number(
+            document.getElementById("kwhSemana").value
+        ),
+
+        horasSemana: Number(
+            document.getElementById("horasSemana").value
+        ),
+
+        precoCombustivel: Number(
+            document.getElementById("valorCombustivel").value
+        ),
+
+        gastoCombustivel: Number(
+            document.getElementById("gastoSemana").value
+        )
+
+    };
+
+    historico.push(semana);
+
+    localStorage.setItem(
+        "historicoSemanal",
+        JSON.stringify(historico)
+    );
+
+    mostrarHistorico();
+
+    alert("Semana guardada!");
+}
+
+
+function mostrarHistorico() {
+
+    const lista =
+        document.getElementById("historyList");
+
+    lista.innerHTML = "";
+
+    historico.forEach(item => {
+
+        const custoKm =
+            item.km > 0
+            ? (item.gastoCombustivel / item.km).toFixed(3)
+            : 0;
+
+        lista.innerHTML += `
+
+        <div style="
+        margin-top:15px;
+        padding:15px;
+        border-radius:15px;
+        background:#111827;
+        border:1px solid #334155;
+        ">
+
+        <h3>${item.periodo}</h3>
+
+        🚗 KM: ${item.km}<br>
+
+        📈 Média KM/H: ${item.mediaKmh}<br>
+
+        ⛽ Consumo: ${item.consumo100} L/100KM<br>
+
+        ⚡ KWh: ${item.kwhSemana}<br>
+
+        ⏱ Horas: ${item.horasSemana}<br>
+
+        💶 Gasto: €${item.gastoCombustivel}<br>
+
+        ⛽ Combustível: €${item.precoCombustivel}/L<br>
+
+        📊 Custo/KM: €${custoKm}<br><br>
+
+        <button onclick="apagarSemana(${item.id})">
+        ❌ Apagar Semana
+        </button>
+
+        </div>
+
+        `;
+    });
+}
+
+
+function apagarSemana(id) {
+
+    if (!confirm("Apagar esta semana?")) {
+        return;
+    }
+
+    historico =
+        historico.filter(item => item.id !== id);
+
+    localStorage.setItem(
+        "historicoSemanal",
+        JSON.stringify(historico)
+    );
+
+    mostrarHistorico();
+}
+
+
+function limparHistorico() {
+
+    if (!confirm("Apagar TODO o histórico?")) {
+        return;
+    }
+
+    historico = [];
+
+    localStorage.removeItem("historicoSemanal");
+
+    mostrarHistorico();
+
+    alert("Histórico removido.");
+}
+
+
+window.addEventListener("load", function() {
+
+    mostrarHistorico();
+
+});
+
+</script>
